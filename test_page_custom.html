@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cur8 Custom Widget - Test Page</title>
+
+  <!-- Custom Widget Stylesheet -->
+  <link rel="stylesheet" href="cur8-widget.css">
+
+  <!-- Optional: moment.js for better date formatting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .widget-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .widget-section h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #333;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 12px;
+    }
+
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #2196F3;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #1565c0;
+    }
+
+    #custom-events-container {
+      min-height: 200px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .code-block {
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 12px;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      color: #666;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎭 Cur8 Custom Events Widget</h1>
+    <p>Fully customizable event display with descriptions and advanced features</p>
+  </header>
+
+  <div class="container">
+    <!-- Demo 1: Basic Widget -->
+    <div class="widget-section">
+      <h2>Default Layout</h2>
+      <div class="info-box">
+        💡 This widget fetches events from the Cur8 public API and displays them with full descriptions,
+        venue information, and direct ticket purchase links.
+      </div>
+      <div id="custom-events-container"></div>
+    </div>
+
+    <!-- Demo 2: Usage Instructions -->
+    <div class="widget-section">
+      <h2>How to Use</h2>
+      <div class="info-box">
+        📖 The widget is completely decoupled from the official cur8-widget.js script.
+        It uses the same public API endpoints but provides full customization.
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Basic Usage:</h3>
+      <div class="code-block">
+&lt;!-- Load the custom widget script --&gt;
+&lt;script src="cur8-custom-widget-enhanced.js"&gt;&lt;/script&gt;
+
+&lt;!-- Load the stylesheet --&gt;
+&lt;link rel="stylesheet" href="cur8-widget.css"&gt;
+
+&lt;!-- Create a container --&gt;
+&lt;div id="my-events"&gt;&lt;/div&gt;
+
+&lt;!-- Initialize the widget --&gt;
+&lt;script&gt;
+  const widget = new CustomCur8Widget(23121, 'my-events');
+  widget.load();
+&lt;/script&gt;
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 16px;">With Options:</h3>
+      <div class="code-block">
+const widget = new CustomCur8Widget(23121, 'my-events', {
+  showDescription: true,
+  showVenue: true,
+  showPricing: true,
+  showDates: true,
+  sortByDate: true,
+  dateFormat: 'LLLL', // requires moment.js
+  ticketDomain: 'https://cur8.com'
+});
+widget.load();
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Configuration Options:</h3>
+      <div style="font-size: 13px; color: #666; line-height: 1.8;">
+        <strong>showDescription</strong> (boolean) - Display event descriptions [default: true]<br>
+        <strong>showVenue</strong> (boolean) - Display venue information [default: true]<br>
+        <strong>showPricing</strong> (boolean) - Display pricing options [default: true]<br>
+        <strong>showDates</strong> (boolean) - Display event dates [default: true]<br>
+        <strong>sortByDate</strong> (boolean) - Sort events by earliest date [default: true]<br>
+        <strong>dateFormat</strong> (string) - Moment.js date format [default: 'LLLL']<br>
+        <strong>ticketDomain</strong> (string) - URL for ticket links [default: 'https://cur8.com']<br>
+      </div>
+    </div>
+
+    <!-- Demo 3: Customization -->
+    <div class="widget-section">
+      <h2>Customization</h2>
+      <div class="info-box">
+        🎨 The widget uses BEM-style CSS classes, making it easy to customize. All styles are in cur8-widget.css
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Common CSS Classes:</h3>
+      <div style="font-size: 13px; color: #666; line-height: 2;">
+        <strong>.cur8-custom-wrapper</strong> - Main container (grid layout)<br>
+        <strong>.cur8-custom-event</strong> - Individual event card<br>
+        <strong>.cur8-custom-event-image</strong> - Event poster image<br>
+        <strong>.cur8-custom-event-title</strong> - Event name/title<br>
+        <strong>.cur8-custom-event-description</strong> - Event description<br>
+        <strong>.cur8-custom-event-venue</strong> - Venue information<br>
+        <strong>.cur8-custom-event-pricing</strong> - Pricing options<br>
+        <strong>.cur8-custom-button-primary</strong> - Ticket purchase button<br>
+      </div>
+
+      <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Example: Custom Colors</h3>
+      <div class="code-block">
+&lt;style&gt;
+  /* Change button color */
+  .cur8-custom-button-primary {
+    background: #ff6b6b;
+  }
+
+  .cur8-custom-button-primary:hover {
+    background: #cc5555;
+  }
+
+  /* Change event card background */
+  .cur8-custom-event {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+  }
+
+  /* Adjust grid layout */
+  .cur8-custom-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+  }
+&lt;/style&gt;
+      </div>
+    </div>
+
+    <!-- Demo 4: Advanced Features -->
+    <div class="widget-section">
+      <h2>Key Differences from Official Widget</h2>
+      <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+        <tr style="background: #f5f5f5;">
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Feature</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Official Widget</th>
+          <th style="border: 1px solid #ddd; padding: 12px; text-align: left;">Custom Widget</th>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px;">Event Descriptions</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">❌ Not displayed</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ Full description</td>
+        </tr>
+        <tr style="background: #f9f9f9;">
+          <td style="border: 1px solid #ddd; padding: 12px;">CSS Customization</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">Limited by HTML structure</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ Full control</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px;">Layout Options</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">Grid only</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ Any layout via CSS</td>
+        </tr>
+        <tr style="background: #f9f9f9;">
+          <td style="border: 1px solid #ddd; padding: 12px;">Ticket Links</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ Built-in</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ Maintained</td>
+        </tr>
+        <tr>
+          <td style="border: 1px solid #ddd; padding: 12px;">Dependencies</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">Relies on cur8's script</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ Independent</td>
+        </tr>
+        <tr style="background: #f9f9f9;">
+          <td style="border: 1px solid #ddd; padding: 12px;">Modification Risk</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">Can break if cur8 updates</td>
+          <td style="border: 1px solid #ddd; padding: 12px;">✅ You control it</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Demo 5: Multiple Configurations -->
+    <div class="widget-section">
+      <h2>Minimal Configuration</h2>
+      <div class="controls">
+        <button class="btn btn-primary" onclick="loadMinimalWidget()">
+          Load Minimal (No Descriptions)
+        </button>
+        <button class="btn btn-primary" onclick="loadFullWidget()">
+          Load Full (All Features)
+        </button>
+      </div>
+      <div id="config-demo-container" style="min-height: 200px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>CustomCur8Widget - Extend without modification</p>
+    <p style="margin-top: 8px; font-size: 12px;">
+      Client ID: 23121 | API: https://cur8.com/api/public/clients
+    </p>
+  </footer>
+
+  <!-- Load the custom widget class -->
+  <script src="cur8-custom-widget-enhanced.js"></script>
+
+  <script>
+    // Initialize default widget on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const widget = new CustomCur8Widget(23121, 'custom-events-container', {
+        showDescription: true,
+        showVenue: true,
+        showPricing: true,
+        showDates: true,
+        sortByDate: true
+      });
+      widget.load();
+    });
+
+    // Load minimal configuration (no descriptions)
+    function loadMinimalWidget() {
+      const widget = new CustomCur8Widget(23121, 'config-demo-container', {
+        showDescription: false,
+        showVenue: true,
+        showPricing: false,
+        showDates: true
+      });
+      widget.load();
+    }
+
+    // Load full configuration (all features)
+    function loadFullWidget() {
+      const widget = new CustomCur8Widget(23121, 'config-demo-container', {
+        showDescription: true,
+        showVenue: true,
+        showPricing: true,
+        showDates: true,
+        sortByDate: true
+      });
+      widget.load();
+    }
+  </script>
+</body>
+</html>

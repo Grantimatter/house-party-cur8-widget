@@ -1,0 +1,204 @@
+/**
+ * Cur8 Widget Enhancement Styles
+ * 
+ * These styles are used by the cur8-widget-enhancement.js script
+ * to enhance the appearance of injected content into the official widget.
+ */
+
+/* ============================================
+   INJECTED DESCRIPTION
+   ============================================ */
+
+.cur8-widget-enhancement-description {
+  background: #f8f9fa;
+  border-left: 3px solid #667eea;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #555;
+}
+
+.cur8-widget-enhancement-description:empty {
+  display: none;
+}
+
+
+/* ============================================
+   EVENT TYPE STYLING
+   ============================================ */
+
+/* Concert */
+.cur8-event-type-concert .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #ff6b6b;
+}
+
+/* Festival */
+.cur8-event-type-festival .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #4ecdc4;
+}
+
+/* Workshop */
+.cur8-event-type-workshop .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #45b7d1;
+}
+
+/* Video On Demand */
+.cur8-event-type-video-on-demand .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #ffa502;
+}
+
+/* Fee */
+.cur8-event-type-fee .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #a29bfe;
+}
+
+/* Trip */
+.cur8-event-type-trip .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #74b9ff;
+}
+
+/* Merchandise */
+.cur8-event-type-merchandise .cur8-widget-wrapper__event__image {
+  border-top: 4px solid #81ecec;
+}
+
+
+/* ============================================
+   AVAILABILITY STYLING
+   ============================================ */
+
+/* Available Events */
+.cur8-event-available {
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+/* Sold Out Events */
+.cur8-event-sold-out {
+  opacity: 0.7;
+}
+
+.cur8-event-sold-out .cur8-widget-wrapper__event__button {
+  position: relative;
+}
+
+.cur8-event-sold-out .cur8-widget-wrapper__event__button::before {
+  content: 'SOLD OUT';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.cur8-event-sold-out .cur8-widget-wrapper__event__button button {
+  pointer-events: none;
+}
+
+
+/* ============================================
+   PRICE TIER STYLING
+   ============================================ */
+
+/* Budget Events ($0-10) */
+.cur8-price-0 {
+  --accent-color: #3498db;
+}
+
+/* Standard Events ($10-30) */
+.cur8-price-20 {
+  --accent-color: #2ecc71;
+}
+
+/* Premium Events ($30-50) */
+.cur8-price-40 {
+  --accent-color: #f39c12;
+}
+
+/* VIP Events ($50+) */
+.cur8-price-50,
+.cur8-price-60,
+.cur8-price-70,
+.cur8-price-80,
+.cur8-price-90,
+.cur8-price-100 {
+  --accent-color: #e74c3c;
+}
+
+/* Apply accent color to button */
+.cur8-price-0 .cur8-widget-button,
+.cur8-price-20 .cur8-widget-button,
+.cur8-price-40 .cur8-widget-button,
+.cur8-price-50 .cur8-widget-button,
+.cur8-price-60 .cur8-widget-button,
+.cur8-price-70 .cur8-widget-button,
+.cur8-price-80 .cur8-widget-button,
+.cur8-price-90 .cur8-widget-button,
+.cur8-price-100 .cur8-widget-button {
+  background-color: var(--accent-color, #667eea);
+}
+
+.cur8-price-0 .cur8-widget-button:hover,
+.cur8-price-20 .cur8-widget-button:hover,
+.cur8-price-40 .cur8-widget-button:hover,
+.cur8-price-50 .cur8-widget-button:hover,
+.cur8-price-60 .cur8-widget-button:hover,
+.cur8-price-70 .cur8-widget-button:hover,
+.cur8-price-80 .cur8-widget-button:hover,
+.cur8-price-90 .cur8-widget-button:hover,
+.cur8-price-100 .cur8-widget-button:hover {
+  filter: brightness(0.9);
+}
+
+
+/* ============================================
+   ENHANCED DESCRIPTION STYLES
+   ============================================ */
+
+/* Add icons for better visual hierarchy */
+.cur8-widget-enhancement-description::before {
+  content: '📝';
+  margin-right: 8px;
+}
+
+/* Truncate long descriptions */
+.cur8-widget-enhancement-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 4.5em;
+}
+
+/* Show full description on hover (optional) */
+/*
+.cur8-widget-wrapper__event:hover .cur8-widget-enhancement-description {
+  -webkit-line-clamp: unset;
+  max-height: unset;
+}
+*/
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 600px) {
+  .cur8-widget-enhancement-description {
+    font-size: 12px;
+    padding: 10px;
+    margin: 10px 0;
+    -webkit-line-clamp: 2;
+    max-height: 3em;
+  }
+}
