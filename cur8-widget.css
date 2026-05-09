@@ -42,7 +42,7 @@
    ============================================ */
 
 .cur8-custom-event {
-  background: white;
+  background: #fafafa;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -128,7 +128,7 @@
 }
 
 .cur8-custom-description-content {
-  color: #555;
+  color: white;
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -141,8 +141,10 @@
 .cur8-custom-description-content,
 .cur8-custom-description-content * {
   color: inherit;
-  background: none;
+  background: none !important;
   border: none;
+  font-family: inherit;
+  letter-spacing: inherit;
 }
 
 .cur8-custom-description-content h1,
@@ -153,7 +155,7 @@
 .cur8-custom-description-content h6 {
   font-size: 13px;
   font-weight: 600;
-  color: #333;
+  color: white;
   margin: 0 0 4px 0;
 }
 
@@ -167,7 +169,7 @@
 
 .cur8-custom-description-content strong {
   font-weight: 600;
-  color: #333;
+  color: white;
 }
 
 .cur8-custom-description-content em {
@@ -225,41 +227,7 @@
   overflow: visible;
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .cur8-custom-description-content {
-    color: #b0b0b0;
-  }
 
-  .cur8-custom-description-content h1,
-  .cur8-custom-description-content h2,
-  .cur8-custom-description-content h3,
-  .cur8-custom-description-content h4,
-  .cur8-custom-description-content h5,
-  .cur8-custom-description-content h6 {
-    color: #e0e0e0;
-  }
-
-  .cur8-custom-description-content strong {
-    color: #e0e0e0;
-  }
-
-  .cur8-custom-description-content a {
-    color: #64b5f6;
-  }
-
-  .cur8-custom-description-content a:hover {
-    color: #90caf9;
-  }
-
-  .cur8-custom-show-more {
-    color: #64b5f6;
-  }
-
-  .cur8-custom-show-more:hover {
-    color: #90caf9;
-  }
-}
 
 
 /* ============================================
@@ -326,7 +294,7 @@
   color: #555;
   margin-bottom: 12px;
   padding: 8px;
-  background: #f8f8f8;
+  background: #f0f0f0;
   border-radius: 4px;
 }
 
@@ -462,52 +430,6 @@
 /* ============================================
    DARK MODE (Optional)
    ============================================ */
-
-@media (prefers-color-scheme: dark) {
-  .cur8-custom-event {
-    background: #1e1e1e;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .cur8-custom-event:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-  }
-
-  .cur8-custom-event-title {
-    color: #e0e0e0;
-  }
-
-  .cur8-custom-event-description {
-    color: #a0a0a0;
-  }
-
-  .cur8-custom-event-venue {
-    background: #2a2a2a;
-    color: #b0b0b0;
-  }
-
-  .cur8-custom-event-venue strong {
-    color: #e0e0e0;
-  }
-
-  .cur8-custom-venue-address {
-    color: #a0a0a0;
-  }
-
-  .cur8-custom-date-item {
-    color: #a0a0a0;
-    border-top-color: #2a2a2a;
-  }
-
-  .cur8-custom-price-label {
-    color: #a0a0a0;
-  }
-
-  .cur8-custom-price-amount {
-    color: #e0e0e0;
-  }
-}
-
 
 /* ============================================
    ALTERNATIVE LAYOUTS

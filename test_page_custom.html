@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -132,6 +133,7 @@
     }
   </style>
 </head>
+
 <body>
   <header>
     <h1>🎭 Cur8 Custom Events Widget</h1>
@@ -159,34 +161,34 @@
 
       <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Basic Usage:</h3>
       <div class="code-block">
-&lt;!-- Load the custom widget script --&gt;
-&lt;script src="cur8-custom-widget-enhanced.js"&gt;&lt;/script&gt;
+        &lt;!-- Load the custom widget script --&gt;
+        &lt;script src="cur8-custom-widget-enhanced.js"&gt;&lt;/script&gt;
 
-&lt;!-- Load the stylesheet --&gt;
-&lt;link rel="stylesheet" href="cur8-widget.css"&gt;
+        &lt;!-- Load the stylesheet --&gt;
+        &lt;link rel="stylesheet" href="cur8-widget.css"&gt;
 
-&lt;!-- Create a container --&gt;
-&lt;div id="my-events"&gt;&lt;/div&gt;
+        &lt;!-- Create a container --&gt;
+        &lt;div id="my-events"&gt;&lt;/div&gt;
 
-&lt;!-- Initialize the widget --&gt;
-&lt;script&gt;
-  const widget = new CustomCur8Widget(23121, 'my-events');
-  widget.load();
-&lt;/script&gt;
+        &lt;!-- Initialize the widget --&gt;
+        &lt;script&gt;
+        const widget = new CustomCur8Widget(23121, 'my-events');
+        widget.load();
+        &lt;/script&gt;
       </div>
 
       <h3 style="margin: 20px 0 12px 0; font-size: 16px;">With Options:</h3>
       <div class="code-block">
-const widget = new CustomCur8Widget(23121, 'my-events', {
-  showDescription: true,
-  showVenue: true,
-  showPricing: true,
-  showDates: true,
-  sortByDate: true,
-  dateFormat: 'LLLL', // requires moment.js
-  ticketDomain: 'https://cur8.com'
-});
-widget.load();
+        const widget = new CustomCur8Widget(23121, 'my-events', {
+        showDescription: true,
+        showVenue: true,
+        showPricing: true,
+        showDates: true,
+        sortByDate: true,
+        dateFormat: 'LLLL', // requires moment.js
+        ticketDomain: 'https://cur8.com'
+        });
+        widget.load();
       </div>
 
       <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Configuration Options:</h3>
@@ -222,27 +224,27 @@ widget.load();
 
       <h3 style="margin: 20px 0 12px 0; font-size: 16px;">Example: Custom Colors</h3>
       <div class="code-block">
-&lt;style&gt;
-  /* Change button color */
-  .cur8-custom-button-primary {
-    background: #ff6b6b;
-  }
+        &lt;style&gt;
+        /* Change button color */
+        .cur8-custom-button-primary {
+        background: #ff6b6b;
+        }
 
-  .cur8-custom-button-primary:hover {
-    background: #cc5555;
-  }
+        .cur8-custom-button-primary:hover {
+        background: #cc5555;
+        }
 
-  /* Change event card background */
-  .cur8-custom-event {
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-  }
+        /* Change event card background */
+        .cur8-custom-event {
+        background: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        }
 
-  /* Adjust grid layout */
-  .cur8-custom-wrapper {
-    grid-template-columns: repeat(2, 1fr);
-  }
-&lt;/style&gt;
+        /* Adjust grid layout */
+        .cur8-custom-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+        }
+        &lt;/style&gt;
       </div>
     </div>
 
@@ -350,4 +352,5 @@ widget.load();
     }
   </script>
 </body>
+
 </html>
