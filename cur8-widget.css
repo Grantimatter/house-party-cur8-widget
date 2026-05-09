@@ -81,8 +81,8 @@
   top: 8px;
   right: 8px;
   background: rgba(0, 0, 0, 0.7);
-  visibility: hidden;
   color: white;
+  visibility: hidden;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 11px;
@@ -360,7 +360,7 @@
 
 .cur8-custom-button {
   display: inline-block;
-  padding: 12px 24px;
+  padding: 12px 0px;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
