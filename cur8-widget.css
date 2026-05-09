@@ -81,6 +81,7 @@
   top: 8px;
   right: 8px;
   background: rgba(0, 0, 0, 0.7);
+  visibility: hidden;
   color: white;
   padding: 4px 12px;
   border-radius: 20px;
@@ -160,7 +161,7 @@
 }
 
 .cur8-custom-description-content p {
-  margin: 0 0 8px 0;
+  margin: 0 0 8px 0px
 }
 
 .cur8-custom-description-content p:last-child {
@@ -176,7 +177,7 @@
   font-style: italic;
 }
 
-.cur8-custom-description-content a {
+.cur 0pxcustom-description-content a {
   color: #007bff;
   text-decoration: underline;
 }
