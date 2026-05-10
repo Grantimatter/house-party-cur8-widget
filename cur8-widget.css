@@ -63,6 +63,7 @@
    ============================================ */
 
 .cur8-custom-event-image {
+  padding: 15px;
   position: relative;
   overflow: hidden;
   background: #f0f0f0;
@@ -74,6 +75,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 8px;
 }
 
 .cur8-custom-event-type {
