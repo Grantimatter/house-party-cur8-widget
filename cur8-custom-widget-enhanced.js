@@ -38,6 +38,8 @@ class CustomCur8Widget {
    */
   async load() {
     try {
+      const params = new URLSearchParams(document.location.search);
+      const event_param = params.get("event");
       const response = await fetch(`${this.apiUrl}/${this.clientId}/events`);
       
       if (!response.ok) {
@@ -45,7 +47,7 @@ class CustomCur8Widget {
       }
 
       const data = await response.json();
-      this.events = data.events || [];
+      this.events = event_param ? data.events.filter(event => event.id == event_param) : data.events || [];
 
       // Sort by earliest date if requested
       if (this.config.sortByDate) {
@@ -96,7 +98,7 @@ class CustomCur8Widget {
     }
 
     const html = this.events.map((event, idx) => 
-      this.renderEvent(event, idx)
+      this.renderEventCard(event, idx)
     ).join('');
 
     container.innerHTML = `<div class="cur8-custom-wrapper">${html}</div>`;
@@ -105,7 +107,7 @@ class CustomCur8Widget {
   /**
    * Render a single event card
    */
-  renderEvent(event, index) {
+  renderEventCard(event, index) {
     const eventName = event.event_name || event.name || 'Event';
     const poster = event.poster_graphic_url || this.getDefaultPoster();
 
