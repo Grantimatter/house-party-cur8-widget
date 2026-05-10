@@ -69,6 +69,7 @@ class CustomCur8Widget {
           new Date(a.event_datetime_local) - new Date(b.event_datetime_local)
         );
       }
+
     });
 
     this.events.sort((a, b) => {
@@ -195,10 +196,11 @@ class CustomCur8Widget {
     const dateHtml = dates.map(date => {
       const dateStr = this.formatDate(date.event_datetime_local);
       const buyUrl = this.getTicketUrl(event, date);
+      const buyText = this.getTicketPurchaseText(event, date);
       return `
         <div class="cur8-custom-date-item">
           <div class="cur8-custom-date-time">${dateStr}</div>
-          <a href="${buyUrl}" target="_blank" class="cur8-custom-date-buy">Buy</a>
+          <a href="${buyUrl}" target="_blank" class="cur8-custom-date-buy">${buyText}</a>
         </div>
       `;
     }).join('');
@@ -261,6 +263,18 @@ class CustomCur8Widget {
   }
 
   /**
+   * Change purchase wording depending on if paid or free
+   * If all purchase options of all dates are free, text should use "Reserve" instead of "Buy"
+   */
+  getTicketButtonText(event) {
+    if (event.event_dates.flatMap(d => d.pricing_options).every(p => p.amount == 0)) {
+      return "Reserve Seat";
+    }
+
+    return "Buy Tickets";
+  }
+
+  /**
    * Render ticket purchase button
    */
   renderTicketButton(event) {
@@ -271,11 +285,12 @@ class CustomCur8Widget {
       
       // Find first available date
       const availableDate = event.event_dates?.find(d => !this.isDatePastSaleEnd(d));
+      const ticketButtonText = this.getTicketButtonText(event);
       if (availableDate) {
         const url = this.getTicketUrl(event, availableDate);
         return `
           <a href="${url}" target="_blank" class="cur8-custom-button cur8-custom-button-primary">
-            Buy Tickets
+            ${ticketButtonText}
           </a>
         `;
       }
@@ -285,7 +300,7 @@ class CustomCur8Widget {
     const url = this.getTicketUrl(event);
     return `
       <a href="${url}" target="_blank" class="cur8-custom-button cur8-custom-button-primary">
-        Buy Tickets
+        ${ticketButtonText}
       </a>
     `;
   }
@@ -312,6 +327,25 @@ class CustomCur8Widget {
 
     // Fallback: link to client schedule page
     return `${domain}/schedule/client/${event.client_id}`;
+  }
+
+  /** 
+   * Check if event is free (option to check only specific dates)
+   */
+  isEventFree(event, date = null) {
+    if (date != null) {
+      return event.event_dates?.find(d => d.id == date.id).pricing_options.every(po => po.amount == 0);
+    }
+
+    return event.event_dates?.flatMap(d => d.pricing_options).every(p => p.amount == 0);
+  }
+
+  /**
+   * Returns "Buy" if event has a charge, and "Reserve" if the event is free.
+   */
+  getTicketPurchaseText(event, date = null) {
+    const all_free = this.isEventFree(event, date);
+    return all_free ? "Reserve" : "Buy"
   }
 
   /**
