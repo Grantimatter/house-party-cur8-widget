@@ -129,11 +129,14 @@ class CustomCur8Widget {
    * Render event image section
    */
   renderImage(event, eventName, poster) {
+    const url = `https://cur8.com/${event.client_id}/project/${event.id}`;
     return `
+      <a target="_blank" href="${url}">
       <div class="cur8-custom-event-image">
         <img src="${poster}" alt="${eventName}" />
         ${event.event_type ? `<span class="cur8-custom-event-type">${event.event_type}</span>` : ''}
       </div>
+      </a>
     `;
   }
 
