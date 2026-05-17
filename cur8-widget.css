@@ -261,6 +261,23 @@
   font-size: 12px;
 }
 
+.cur8-custom-date-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cur8-custom-date-warning {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #fff3cd;
+  color: #856404;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
 .cur8-custom-date-buy {
   display: inline-block;
   padding: 4px 12px;

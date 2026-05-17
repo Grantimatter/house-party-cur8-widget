@@ -32,6 +32,8 @@ class CustomCur8Widget {
       sortByDate: options.sortByDate !== false,
       ...options
     };
+
+    document.head.innerHTML += '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,1,0&icon_names=bolt" />';
   }
 
   /**
@@ -110,7 +112,7 @@ class CustomCur8Widget {
     if (!houseCount || !houseCount.total_count) {
       return null;
     }
-    const available = houseCount.total_count - (houseCount.sold_count + houseCount.held_count);
+    const available = houseCount.total_count - houseCount.count;
     return Math.max(0, Math.round((available / houseCount.total_count) * 100));
   }
 
@@ -121,14 +123,16 @@ class CustomCur8Widget {
     if (!houseCount || !houseCount.total_count) {
       return null;
     }
-    const available = houseCount.total_count - (houseCount.sold_count + houseCount.held_count);
+    const available = houseCount.total_count - (houseCount.count);
     if (available <= 0) {
       return { status: 'sold-out', message: '🚫 SOLD OUT', color: '#dc3545' };
-    } else if (available <= 2) {
-      return { status: 'almost-gone', message: '⚠️ ONLY ' + available + ' LEFT', color: '#ff6b6b' };
-    } else if (available <= Math.ceil(houseCount.total_count * 0.1)) {
-      return { status: 'limited', message: '⏰ HURRY - ' + Math.round((available / houseCount.total_count) * 100) + '% LEFT', color: '#ff9500' };
     }
+    // else if (available <= 2) {
+    //   return { status: 'almost-gone', message: '⚠️ ONLY ' + available + ' LEFT', color: '#ff6b6b' };
+    // }
+    // else if (available <= Math.ceil(houseCount.total_count * 0.1)) {
+    //   return { status: 'limited', message: '⏰ HURRY - ' + Math.round((available / houseCount.total_count) * 100) + '% LEFT', color: '#ff9500' };
+    // }
     return null;
   }
 
@@ -139,7 +143,7 @@ class CustomCur8Widget {
     if (!date.houseCount || !date.houseCount.total_count) {
       return false;
     }
-    const available = date.houseCount.total_count - (date.houseCount.sold_count + date.houseCount.held_count);
+    const available = date.houseCount.total_count - date.houseCount.count;
     return available <= 0;
   }
 
@@ -158,22 +162,28 @@ class CustomCur8Widget {
   }
 
   /**
-   * Get the lowest ticket count threshold for "almost sold out" warning
+   * Check if a date is almost sold out (under threshold)
    */
-  getLowestTicketCount(event) {
+  isDateAlmostSoldOut(date, threshold = 5) {
+    if (!date.houseCount || !date.houseCount.total_count) {
+      return false;
+    }
+    const available = date.houseCount.total_count - (date.houseCount.sold_count + date.houseCount.held_count);
+    return available > 0 && available < threshold;
+  }
+
+  /**
+   * Check if all dates are either sold out or almost sold out
+   */
+  areAllDatesLimitedOrSoldOut(event, threshold = 5) {
     if (!event.event_dates || event.event_dates.length === 0) {
-      return null;
+      return false;
     }
-    let lowestCount = Infinity;
-    for (const date of event.event_dates) {
-      if (!this.isDatePastSaleEnd(date) && date.houseCount && date.houseCount.total_count) {
-        const available = date.houseCount.total_count - (date.houseCount.sold_count + date.houseCount.held_count);
-        if (available > 0 && available < lowestCount) {
-          lowestCount = available;
-        }
-      }
+    const availableDates = event.event_dates.filter(d => !this.isDatePastSaleEnd(d));
+    if (availableDates.length === 0) {
+      return false;
     }
-    return lowestCount === Infinity ? null : lowestCount;
+    return availableDates.every(d => this.isDateSoldOut(d) || this.isDateAlmostSoldOut(d, threshold));
   }
 
   /**
@@ -226,8 +236,7 @@ class CustomCur8Widget {
     const eventName = event.event_name || event.name || 'Event';
     const poster = event.poster_graphic_url || this.getDefaultPoster();
     const allDatesSoldOut = this.areAllDatesSoldOut(event);
-    const lowestTicketCount = this.getLowestTicketCount(event);
-    const showAlmostSoldOutWarning = lowestTicketCount !== null && lowestTicketCount < 5;
+    const allDatesLimitedOrSoldOut = this.areAllDatesLimitedOrSoldOut(event);
 
     return `
       <div class="cur8-custom-event ${allDatesSoldOut ? 'cur8-custom-event-sold-out' : ''}" data-event-id="${index}">
@@ -235,7 +244,7 @@ class CustomCur8Widget {
         ${allDatesSoldOut ? '<div class="cur8-custom-sold-out-ribbon">SOLD OUT!</div>' : ''}
         <div class="cur8-custom-event-content">
           ${this.renderTitle(event, eventName)}
-          ${showAlmostSoldOutWarning ? `<div class="cur8-custom-almost-sold-out-warning">⚠️ Warning, almost sold out!</div>` : ''}
+          ${allDatesLimitedOrSoldOut ? `<div class="cur8-custom-almost-sold-out-warning">⚠️ Warning, almost sold out!</div>` : ''}
           ${this.renderDescription(event)}
           ${this.renderDates(event)}
           ${this.renderVenue(event)}
@@ -320,6 +329,7 @@ class CustomCur8Widget {
       const buyUrl = this.getTicketUrl(event, date);
       const buyText = this.getTicketPurchaseText(event, date);
       const isSoldOut = this.isDateSoldOut(date);
+      const isAlmostSoldOut = this.isDateAlmostSoldOut(date);
       
       if (isSoldOut) {
         return `
@@ -330,10 +340,15 @@ class CustomCur8Widget {
         `;
       }
       
+      const warningHtml = isAlmostSoldOut ? '<span class="cur8-custom-date-warning">⚠️ Limited</span>' : '';
+      
       return `
         <div class="cur8-custom-date-item">
           <div class="cur8-custom-date-time">${dateStr}</div>
-          <a href="${buyUrl}" target="_blank" class="cur8-custom-date-buy">${buyText}</a>
+          <div class="cur8-custom-date-actions">
+            ${warningHtml}
+            <a href="${buyUrl}" target="_blank" class="cur8-custom-date-buy">${buyText}</a>
+          </div>
         </div>
       `;
     }).join('');
