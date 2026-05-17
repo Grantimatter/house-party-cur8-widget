@@ -429,6 +429,69 @@
 }
 
 
+
+/* ============================================
+    SOLD OUT STYLING
+    ============================================ */
+
+.cur8-custom-event-sold-out {
+  position: relative;
+}
+
+.cur8-custom-event-sold-out .cur8-custom-event-image {
+  filter: grayscale(50%);
+}
+
+.cur8-custom-sold-out-ribbon {
+  position: absolute;
+  top: 20px;
+  right: -35px;
+  width: 200px;
+  padding: 8px 0;
+  background: #dc3545;
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  transform: rotate(45deg);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cur8-custom-almost-sold-out-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 3px;
+}
+
+.cur8-custom-date-item-sold-out {
+  opacity: 0.6;
+  font-size: 12px;
+  color: #999;
+  padding: 8px 0;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cur8-custom-date-sold-out-label {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #dc3545;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
 /* ============================================
    DARK MODE (Optional)
    ============================================ */

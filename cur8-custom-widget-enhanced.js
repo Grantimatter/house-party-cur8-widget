@@ -19,6 +19,7 @@ class CustomCur8Widget {
     this.containerId = containerId;
     this.events = [];
     this.apiUrl = 'https://cur8.com/api/public/clients';
+    this.houseCountUrl = 'https://cur8-housecount-proxy.grantwiswell.workers.dev';
     
     // Configuration options
     this.config = {
@@ -49,6 +50,11 @@ class CustomCur8Widget {
       const data = await response.json();
       this.events = event_param ? data.events.filter(event => event.id == event_param) : data.events || [];
 
+      // Fetch house count for sold-out status
+      await Promise.all(this.events.map(async (event) => {
+        await this.loadHouseCount(event);
+      }));
+
       // Sort by earliest date if requested
       if (this.config.sortByDate) {
         this.sortEventsByDate();
@@ -59,6 +65,115 @@ class CustomCur8Widget {
       console.error('CustomCur8Widget: Failed to load events', error);
       this.renderError(error.message);
     }
+  }
+
+  /**
+   * Fetch house count (seat availability) for the event
+   */
+  async loadHouseCount(event) {
+
+    /**
+    * Fetch on cache miss
+    */
+    await Promise.all(event.event_dates.map(async (date) => {
+      try {
+        const CACHE_DIRATION = 5 * 60 * 1000; // 5 minutes in ms
+        const cacheKey = `cur8_scheduled_item_${date.id}`;
+        const cached = sessionStorage.getItem(cacheKey);
+        const cachedAt = sessionStorage.getItem(`${cacheKey}_time`);
+
+        if (cached && cachedAt && Date.now() - cachedAt < CACHE_DIRATION) {
+          const data = JSON.parse(cached);
+          date.houseCount = data;
+        } else {
+          await fetch(`${this.houseCountUrl}/${date.id}`)
+            .then(res => res.json())
+            .then(data => {
+              date.houseCount = data;
+              sessionStorage.setItem(cacheKey, JSON.stringify(data));
+              sessionStorage.setItem(`${cacheKey}_time`, Date.now());
+            });
+        }
+
+        console.debug("Date data:", date);
+      } catch (error) {
+        console.warn('Failed to load house count:', error);
+        // Don't fail the entire page if house count fails
+      }
+    }));
+  }
+
+  /**
+   * Calculate seat availability percentage
+   */
+  getAvailabilityPercentage(houseCount) {
+    if (!houseCount || !houseCount.total_count) {
+      return null;
+    }
+    const available = houseCount.total_count - (houseCount.sold_count + houseCount.held_count);
+    return Math.max(0, Math.round((available / houseCount.total_count) * 100));
+  }
+
+  /**
+   * Get seat availability status
+   */
+  getSoldOutStatus(houseCount) {
+    if (!houseCount || !houseCount.total_count) {
+      return null;
+    }
+    const available = houseCount.total_count - (houseCount.sold_count + houseCount.held_count);
+    if (available <= 0) {
+      return { status: 'sold-out', message: '🚫 SOLD OUT', color: '#dc3545' };
+    } else if (available <= 2) {
+      return { status: 'almost-gone', message: '⚠️ ONLY ' + available + ' LEFT', color: '#ff6b6b' };
+    } else if (available <= Math.ceil(houseCount.total_count * 0.1)) {
+      return { status: 'limited', message: '⏰ HURRY - ' + Math.round((available / houseCount.total_count) * 100) + '% LEFT', color: '#ff9500' };
+    }
+    return null;
+  }
+
+  /**
+   * Check if a date is sold out
+   */
+  isDateSoldOut(date) {
+    if (!date.houseCount || !date.houseCount.total_count) {
+      return false;
+    }
+    const available = date.houseCount.total_count - (date.houseCount.sold_count + date.houseCount.held_count);
+    return available <= 0;
+  }
+
+  /**
+   * Check if all dates for an event are sold out
+   */
+  areAllDatesSoldOut(event) {
+    if (!event.event_dates || event.event_dates.length === 0) {
+      return false;
+    }
+    const availableDates = event.event_dates.filter(d => !this.isDatePastSaleEnd(d));
+    if (availableDates.length === 0) {
+      return false;
+    }
+    return availableDates.every(d => this.isDateSoldOut(d));
+  }
+
+  /**
+   * Get the lowest ticket count threshold for "almost sold out" warning
+   */
+  getLowestTicketCount(event) {
+    if (!event.event_dates || event.event_dates.length === 0) {
+      return null;
+    }
+    let lowestCount = Infinity;
+    for (const date of event.event_dates) {
+      if (!this.isDatePastSaleEnd(date) && date.houseCount && date.houseCount.total_count) {
+        const available = date.houseCount.total_count - (date.houseCount.sold_count + date.houseCount.held_count);
+        if (available > 0 && available < lowestCount) {
+          lowestCount = available;
+        }
+      }
+    }
+    return lowestCount === Infinity ? null : lowestCount;
   }
 
   /**
@@ -110,12 +225,17 @@ class CustomCur8Widget {
   renderEventCard(event, index) {
     const eventName = event.event_name || event.name || 'Event';
     const poster = event.poster_graphic_url || this.getDefaultPoster();
+    const allDatesSoldOut = this.areAllDatesSoldOut(event);
+    const lowestTicketCount = this.getLowestTicketCount(event);
+    const showAlmostSoldOutWarning = lowestTicketCount !== null && lowestTicketCount < 5;
 
     return `
-      <div class="cur8-custom-event" data-event-id="${index}">
+      <div class="cur8-custom-event ${allDatesSoldOut ? 'cur8-custom-event-sold-out' : ''}" data-event-id="${index}">
         ${this.renderImage(event, eventName, poster)}
+        ${allDatesSoldOut ? '<div class="cur8-custom-sold-out-ribbon">SOLD OUT!</div>' : ''}
         <div class="cur8-custom-event-content">
           ${this.renderTitle(event, eventName)}
+          ${showAlmostSoldOutWarning ? `<div class="cur8-custom-almost-sold-out-warning">⚠️ Warning, almost sold out!</div>` : ''}
           ${this.renderDescription(event)}
           ${this.renderDates(event)}
           ${this.renderVenue(event)}
@@ -199,6 +319,17 @@ class CustomCur8Widget {
       const dateStr = this.formatDate(date.event_datetime_local);
       const buyUrl = this.getTicketUrl(event, date);
       const buyText = this.getTicketPurchaseText(event, date);
+      const isSoldOut = this.isDateSoldOut(date);
+      
+      if (isSoldOut) {
+        return `
+          <div class="cur8-custom-date-item cur8-custom-date-item-sold-out">
+            <div class="cur8-custom-date-time">${dateStr}</div>
+            <span class="cur8-custom-date-sold-out-label">SOLD OUT</span>
+          </div>
+        `;
+      }
+      
       return `
         <div class="cur8-custom-date-item">
           <div class="cur8-custom-date-time">${dateStr}</div>
@@ -280,13 +411,20 @@ class CustomCur8Widget {
    * Render ticket purchase button
    */
   renderTicketButton(event) {
+    const allDatesSoldOut = this.areAllDatesSoldOut(event);
+    
+    // Hide button if all dates are sold out
+    if (allDatesSoldOut) {
+      return '';
+    }
+
     // For regular events, link to first available date
     if (event.event_type !== 'Video On Demand' && event.event_type !== 'V' && 
         event.event_type !== 'Fee' && event.event_type !== 'Merchandise' && 
         event.event_type !== 'Trip') {
       
-      // Find first available date
-      const availableDate = event.event_dates?.find(d => !this.isDatePastSaleEnd(d));
+      // Find first available date that is not sold out
+      const availableDate = event.event_dates?.find(d => !this.isDatePastSaleEnd(d) && !this.isDateSoldOut(d));
       const ticketButtonText = this.getTicketButtonText(event);
       if (availableDate) {
         const url = this.getTicketUrl(event, availableDate);
@@ -300,6 +438,7 @@ class CustomCur8Widget {
 
     // For special event types or no available dates
     const url = this.getTicketUrl(event);
+    const ticketButtonText = this.getTicketButtonText(event);
     return `
       <a href="${url}" target="_blank" class="cur8-custom-button cur8-custom-button-primary">
         ${ticketButtonText}
