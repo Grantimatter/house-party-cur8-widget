@@ -451,27 +451,81 @@
     SOLD OUT STYLING
     ============================================ */
 
-.cur8-custom-event-sold-out {
+.cur8-custom-event-sold-out,
+.cur8-custom-event-almost-sold-out {
   position: relative;
 }
 
-.cur8-custom-event-sold-out .cur8-custom-event-image {
-  filter: grayscale(50%);
+.cur8-custom-event-almost-sold-out {
+  position: relative;
 }
 
+.cur8-custom-event-sold-out .cur8-custom-event-image img {
+  filter: grayscale(70%) brightness(75%);
+}
+
+/* .cur8-custom-sold-out-ribbon { */
+/* position: absolute; */
+/* top: 30px; */
+/* right: -50px; */
+/* width: 200px; */
+/* padding: 8px 0; */
+/* background: #dc3545; */
+/* color: white; */
+/* text-align: center; */
+/* font-weight: 700; */
+/* font-size: 14px; */
+/* letter-spacing: 1px; */
+/* transform: rotate(45deg); */
+/* z-index: 10; */
+/* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); */
+/* } */
+
+
+/*
+ * SOLD OUT (Diagonal Ribbon)
+ */
+/* .cur8-custom-sold-out-ribbon { */
+/* position: absolute; */
+/* top: 250px; */
+/* right: -175px; */
+/* width: 750px; */
+/* padding: 8px 0; */
+/* background: #dc3545dd; */
+/* color: #ffffffdd; */
+/* text-align: center; */
+/* font-weight: 700; */
+/* font-size: 24px; */
+/* letter-spacing: 1px; */
+/* transform: rotate(-30deg); */
+/* z-index: 10; */
+/* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); */
+/* } */
+
+
+/*
+ * SOLD OUT (Similar to custom "SOLD OUT" image)
+ */
 .cur8-custom-sold-out-ribbon {
+  display: flex;
   position: absolute;
-  top: 20px;
-  right: -35px;
-  width: 200px;
+  top: 52%;
+  right: 13%;
+  width: 75%;
+  height: 13.5%;
   padding: 8px 0;
-  background: #dc3545;
-  color: white;
+  background: #dc3545dd;
+  color: #ffffffdd;
+  border: 4px;
+  border-style: solid;
+  border-color: #ffffffdd;
   text-align: center;
+  justify-content: center;
+  align-items: center;
   font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 1px;
-  transform: rotate(45deg);
+  font-size: 42px;
+  letter-spacing: -2px;
+  transform: rotate(-10.1deg);
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
@@ -509,6 +563,7 @@
   text-decoration: none;
   white-space: nowrap;
 }
+
 /* ============================================
    DARK MODE (Optional)
    ============================================ */

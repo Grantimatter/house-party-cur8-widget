@@ -79,10 +79,13 @@ class CustomCur8Widget {
     */
     await Promise.all(event.event_dates.map(async (date) => {
       try {
-        const CACHE_DIRATION = 5 * 60 * 1000; // 5 minutes in ms
+        const CACHE_DIRATION = 10 * 60 * 1000; // 10 minutes in ms
         const cacheKey = `cur8_scheduled_item_${date.id}`;
-        const cached = sessionStorage.getItem(cacheKey);
-        const cachedAt = sessionStorage.getItem(`${cacheKey}_time`);
+        const cachedAtKey = `${cacheKey}_time`;
+
+        // Encode seating details so it's not easily visible to non-technical visitors
+        const cached = atob(sessionStorage.getItem(btoa(cacheKey)));
+        const cachedAt = atob(sessionStorage.getItem(btoa(cachedAtKey)));
 
         if (cached && cachedAt && Date.now() - cachedAt < CACHE_DIRATION) {
           const data = JSON.parse(cached);
@@ -92,12 +95,10 @@ class CustomCur8Widget {
             .then(res => res.json())
             .then(data => {
               date.houseCount = data;
-              sessionStorage.setItem(cacheKey, JSON.stringify(data));
-              sessionStorage.setItem(`${cacheKey}_time`, Date.now());
+              sessionStorage.setItem(btoa(cacheKey), btoa(JSON.stringify(data)));
+              sessionStorage.setItem(btoa(cachedAtKey), btoa(Date.now()));
             });
         }
-
-        console.debug("Date data:", date);
       } catch (error) {
         console.warn('Failed to load house count:', error);
         // Don't fail the entire page if house count fails
@@ -114,26 +115,6 @@ class CustomCur8Widget {
     }
     const available = houseCount.total_count - houseCount.count;
     return Math.max(0, Math.round((available / houseCount.total_count) * 100));
-  }
-
-  /**
-   * Get seat availability status
-   */
-  getSoldOutStatus(houseCount) {
-    if (!houseCount || !houseCount.total_count) {
-      return null;
-    }
-    const available = houseCount.total_count - (houseCount.count);
-    if (available <= 0) {
-      return { status: 'sold-out', message: '🚫 SOLD OUT', color: '#dc3545' };
-    }
-    // else if (available <= 2) {
-    //   return { status: 'almost-gone', message: '⚠️ ONLY ' + available + ' LEFT', color: '#ff6b6b' };
-    // }
-    // else if (available <= Math.ceil(houseCount.total_count * 0.1)) {
-    //   return { status: 'limited', message: '⏰ HURRY - ' + Math.round((available / houseCount.total_count) * 100) + '% LEFT', color: '#ff9500' };
-    // }
-    return null;
   }
 
   /**
@@ -168,7 +149,7 @@ class CustomCur8Widget {
     if (!date.houseCount || !date.houseCount.total_count) {
       return false;
     }
-    const available = date.houseCount.total_count - (date.houseCount.sold_count + date.houseCount.held_count);
+    const available = date.houseCount.total_count - date.houseCount.count;
     return available > 0 && available < threshold;
   }
 
@@ -181,6 +162,9 @@ class CustomCur8Widget {
     }
     const availableDates = event.event_dates.filter(d => !this.isDatePastSaleEnd(d));
     if (availableDates.length === 0) {
+      return false;
+    }
+    if (availableDates.every(d => this.isDateSoldOut(d))) {
       return false;
     }
     return availableDates.every(d => this.isDateSoldOut(d) || this.isDateAlmostSoldOut(d, threshold));
@@ -236,15 +220,20 @@ class CustomCur8Widget {
     const eventName = event.event_name || event.name || 'Event';
     const poster = event.poster_graphic_url || this.getDefaultPoster();
     const allDatesSoldOut = this.areAllDatesSoldOut(event);
-    const allDatesLimitedOrSoldOut = this.areAllDatesLimitedOrSoldOut(event);
+    const allDatesLimitedOrSoldOut = this.areAllDatesLimitedOrSoldOut(event, 5);
+    let seatStatusClass = '';
+    if (allDatesSoldOut) {
+      seatStatusClass = 'cur8-custom-event-sold-out';
+    } else if (allDatesLimitedOrSoldOut) {
+      seatStatusClass = 'cur8-custom-event-almost-sold-out';
+    }
 
     return `
-      <div class="cur8-custom-event ${allDatesSoldOut ? 'cur8-custom-event-sold-out' : ''}" data-event-id="${index}">
-        ${this.renderImage(event, eventName, poster)}
-        ${allDatesSoldOut ? '<div class="cur8-custom-sold-out-ribbon">SOLD OUT!</div>' : ''}
+      <div class="cur8-custom-event ${seatStatusClass}" data-event-id="${index}">
+        ${this.renderImage(event, eventName, poster, allDatesSoldOut)}
         <div class="cur8-custom-event-content">
           ${this.renderTitle(event, eventName)}
-          ${allDatesLimitedOrSoldOut ? `<div class="cur8-custom-almost-sold-out-warning">⚠️ Warning, almost sold out!</div>` : ''}
+          ${allDatesLimitedOrSoldOut ? `<div class="cur8-custom-almost-sold-out-warning">⚠️ Hurry, almost sold out!</div>` : ''} 
           ${this.renderDescription(event)}
           ${this.renderDates(event)}
           ${this.renderVenue(event)}
@@ -260,12 +249,13 @@ class CustomCur8Widget {
   /**
    * Render event image section
    */
-  renderImage(event, eventName, poster) {
+  renderImage(event, eventName, poster, soldOut) {
     const url = `https://cur8.com/${event.client_id}/project/${event.id}`;
     return `
       <a target="_blank" href="${url}">
         <div class="cur8-custom-event-image">
           <img src="${poster}" alt="${eventName}" />
+          ${soldOut ? '<div class="cur8-custom-sold-out-ribbon">SOLD OUT!</div>' : ''}
           ${event.event_type ? `<span class="cur8-custom-event-type">${event.event_type}</span>` : ''}
         </div>
       </a>
@@ -329,7 +319,7 @@ class CustomCur8Widget {
       const buyUrl = this.getTicketUrl(event, date);
       const buyText = this.getTicketPurchaseText(event, date);
       const isSoldOut = this.isDateSoldOut(date);
-      const isAlmostSoldOut = this.isDateAlmostSoldOut(date);
+      const isAlmostSoldOut = this.isDateAlmostSoldOut(date, 5);
       
       if (isSoldOut) {
         return `
@@ -340,7 +330,7 @@ class CustomCur8Widget {
         `;
       }
       
-      const warningHtml = isAlmostSoldOut ? '<span class="cur8-custom-date-warning">⚠️ Limited</span>' : '';
+      const warningHtml = isAlmostSoldOut ? '<span class="cur8-custom-date-warning">⚠️ Almost sold out!</span>' : '';
       
       return `
         <div class="cur8-custom-date-item">
