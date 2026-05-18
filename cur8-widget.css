@@ -509,10 +509,10 @@
 .cur8-custom-sold-out-ribbon {
   display: flex;
   position: absolute;
-  top: 52%;
-  right: 13%;
-  width: 75%;
-  height: 13.5%;
+  top: 51%;
+  right: 13.5%;
+  width: 71%;
+  height: 11.3%;
   padding: 8px 0;
   background: #dc3545dd;
   color: #ffffffdd;
