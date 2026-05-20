@@ -29,6 +29,7 @@ class CustomCur8Widget {
       showDates: options.showDates !== false,
       dateFormat: options.dateFormat || 'LLLL', // requires moment.js
       ticketDomain: options.ticketDomain || 'https://cur8.com',
+      lowTicketThreshold: options.lowTicketThreshold || 10,
       sortByDate: options.sortByDate !== false,
       ...options
     };
@@ -145,7 +146,7 @@ class CustomCur8Widget {
   /**
    * Check if a date is almost sold out (under threshold)
    */
-  isDateAlmostSoldOut(date, threshold = 5) {
+  isDateAlmostSoldOut(date, threshold = 10) {
     if (!date.houseCount || !date.houseCount.total_count) {
       return false;
     }
@@ -156,7 +157,7 @@ class CustomCur8Widget {
   /**
    * Check if all dates are either sold out or almost sold out
    */
-  areAllDatesLimitedOrSoldOut(event, threshold = 5) {
+  areAllDatesLimitedOrSoldOut(event, threshold = 10) {
     if (!event.event_dates || event.event_dates.length === 0) {
       return false;
     }
@@ -319,7 +320,7 @@ class CustomCur8Widget {
       const buyUrl = this.getTicketUrl(event, date);
       const buyText = this.getTicketPurchaseText(event, date);
       const isSoldOut = this.isDateSoldOut(date);
-      const isAlmostSoldOut = this.isDateAlmostSoldOut(date, 5);
+      const isAlmostSoldOut = this.isDateAlmostSoldOut(date, this.config.lowTicketThreshold);
       
       if (isSoldOut) {
         return `
