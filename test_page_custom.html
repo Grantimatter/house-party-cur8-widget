@@ -186,7 +186,9 @@
         showDates: true,
         sortByDate: true,
         dateFormat: 'LLLL', // requires moment.js
-        ticketDomain: 'https://cur8.com'
+        ticketDomain: 'https://cur8.com',
+        autoRefresh: true, // refresh while the page is the active tab
+        refreshIntervalMs: 60 * 60 * 1000 // 1 hour (default)
         });
         widget.load();
       </div>
@@ -200,6 +202,8 @@
         <strong>sortByDate</strong> (boolean) - Sort events by earliest date [default: true]<br>
         <strong>dateFormat</strong> (string) - Moment.js date format [default: 'LLLL']<br>
         <strong>ticketDomain</strong> (string) - URL for ticket links [default: 'https://cur8.com']<br>
+        <strong>autoRefresh</strong> (boolean) - Refresh event data automatically while this is the active tab [default: true]<br>
+        <strong>refreshIntervalMs</strong> (number) - Minimum time between auto-refreshes in milliseconds [default: 3600000 (1 hour)]<br>
       </div>
     </div>
 

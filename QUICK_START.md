@@ -86,9 +86,39 @@ const widget = new CustomCur8Widget(clientId, containerId, {
   showDates: true,            // Show event dates
   sortByDate: true,           // Sort by earliest date
   dateFormat: 'LLLL',         // moment.js format
-  ticketDomain: 'https://cur8.com'
+  ticketDomain: 'https://cur8.com',
+  autoRefresh: true,          // Refresh while this is the active tab
+  refreshIntervalMs: 60 * 60 * 1000 // 1 hour (default)
 });
 widget.load();
+```
+
+### Automatic Refresh
+
+The widget automatically re-fetches events when both of these are true:
+
+1. The page is the active, currently selected browser tab
+2. At least `refreshIntervalMs` has passed since the last refresh (default: 1 hour)
+
+Background tabs do not refresh. When you return to the tab after the interval
+has passed, the widget refreshes immediately. A failed background refresh keeps
+the last successful event content on screen.
+
+```javascript
+// Refresh every 15 minutes
+const widget = new CustomCur8Widget(23121, 'events', {
+  refreshIntervalMs: 15 * 60 * 1000
+});
+widget.load();
+
+// Disable automatic refresh
+const manualWidget = new CustomCur8Widget(23121, 'events', {
+  autoRefresh: false
+});
+manualWidget.load();
+
+// Force a refresh at any time
+widget.refresh();
 ```
 
 ---

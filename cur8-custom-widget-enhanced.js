@@ -20,6 +20,11 @@ class CustomCur8Widget {
     this.events = [];
     this.apiUrl = 'https://cur8.com/api/public/clients';
     this.houseCountUrl = 'https://cur8-housecount-proxy.grantwiswell.workers.dev';
+    this.lastRefreshedAt = null;
+    this._lastRefreshAttemptAt = null;
+    this._isLoading = false;
+    this._autoRefreshStarted = false;
+    this._autoRefreshTimer = null;
     
     // Configuration options
     this.config = {
@@ -31,16 +36,33 @@ class CustomCur8Widget {
       ticketDomain: options.ticketDomain || 'https://cur8.com',
       lowTicketThreshold: options.lowTicketThreshold || 10,
       sortByDate: options.sortByDate !== false,
+      autoRefresh: options.autoRefresh !== false,
+      refreshIntervalMs: options.refreshIntervalMs || 60 * 60 * 1000, // 1 hour
       ...options
     };
 
+    if (!Number.isFinite(this.config.refreshIntervalMs) || this.config.refreshIntervalMs <= 0) {
+      this.config.refreshIntervalMs = 60 * 60 * 1000;
+    }
+
     document.head.innerHTML += '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,1,0&icon_names=bolt" />';
+
+    this.startAutoRefresh();
   }
 
   /**
    * Fetch events from cur8 API
+   * @param {Object} options
+   * @param {boolean} options.isAutoRefresh - Preserve existing content if a background refresh fails
    */
-  async load() {
+  async load({ isAutoRefresh = false } = {}) {
+    if (this._isLoading) {
+      return;
+    }
+
+    this._isLoading = true;
+    this._lastRefreshAttemptAt = Date.now();
+
     try {
       const params = new URLSearchParams(document.location.search);
       const event_param = params.get("event");
@@ -53,9 +75,10 @@ class CustomCur8Widget {
       const data = await response.json();
       this.events = event_param ? data.events.filter(event => event.id == event_param) : data.events || [];
 
-      // Fetch house count for sold-out status
+      // Fetch house count for sold-out status. Auto-refresh bypasses the
+      // short-lived cache so availability is current.
       await Promise.all(this.events.map(async (event) => {
-        await this.loadHouseCount(event);
+        await this.loadHouseCount(event, { force: isAutoRefresh });
       }));
 
       // Sort by earliest date if requested
@@ -64,16 +87,27 @@ class CustomCur8Widget {
       }
 
       this.render();
+      this.lastRefreshedAt = Date.now();
     } catch (error) {
       console.error('CustomCur8Widget: Failed to load events', error);
-      this.renderError(error.message);
+
+      // A failed automatic refresh should not replace a working widget with
+      // an error message; keep showing the last successful results.
+      if (!(isAutoRefresh && this.events.length > 0)) {
+        this.renderError(error.message);
+      }
+    } finally {
+      this._isLoading = false;
     }
   }
 
   /**
    * Fetch house count (seat availability) for the event
+   * @param {Object} event
+   * @param {Object} options
+   * @param {boolean} options.force - Skip the session cache and fetch fresh counts
    */
-  async loadHouseCount(event) {
+  async loadHouseCount(event, { force = false } = {}) {
 
     /**
     * Fetch on cache miss
@@ -88,7 +122,7 @@ class CustomCur8Widget {
         const cached = atob(sessionStorage.getItem(btoa(cacheKey)));
         const cachedAt = atob(sessionStorage.getItem(btoa(cachedAtKey)));
 
-        if (cached && cachedAt && Date.now() - cachedAt < CACHE_DIRATION) {
+        if (!force && cached && cachedAt && Date.now() - cachedAt < CACHE_DIRATION) {
           const data = JSON.parse(cached);
           date.houseCount = data;
         } else {
@@ -105,6 +139,85 @@ class CustomCur8Widget {
         // Don't fail the entire page if house count fails
       }
     }));
+  }
+
+  /**
+   * Start the automatic refresh loop.
+   *
+   * Refreshes only happen while this page is the active, currently selected
+   * tab, and only after the configured interval has elapsed since the last
+   * refresh attempt. Visibility and focus changes are checked immediately so
+   * a tab that was left in the background updates as soon as it is viewed.
+   */
+  startAutoRefresh() {
+    if (!this.config.autoRefresh || this._autoRefreshStarted) {
+      return;
+    }
+
+    this._autoRefreshStarted = true;
+    this._onPageActive = () => this._maybeAutoRefresh();
+
+    document.addEventListener('visibilitychange', this._onPageActive);
+    window.addEventListener('focus', this._onPageActive);
+    window.addEventListener('pageshow', this._onPageActive);
+
+    // Poll at least once a minute (or more often for short intervals). The
+    // visibility check keeps background tabs from doing any work.
+    const checkEveryMs = Math.min(this.config.refreshIntervalMs, 60 * 1000);
+    this._autoRefreshTimer = setInterval(() => this._maybeAutoRefresh(), checkEveryMs);
+  }
+
+  /**
+   * Stop the automatic refresh loop and remove its listeners.
+   */
+  stopAutoRefresh() {
+    if (this._autoRefreshTimer !== null) {
+      clearInterval(this._autoRefreshTimer);
+      this._autoRefreshTimer = null;
+    }
+
+    if (this._autoRefreshStarted) {
+      document.removeEventListener('visibilitychange', this._onPageActive);
+      window.removeEventListener('focus', this._onPageActive);
+      window.removeEventListener('pageshow', this._onPageActive);
+      this._autoRefreshStarted = false;
+      this._onPageActive = null;
+    }
+  }
+
+  /**
+   * Whether this page is the active, currently selected tab.
+   */
+  _isPageActive() {
+    return document.visibilityState === 'visible';
+  }
+
+  /**
+   * Refresh the events now. Existing content is preserved if the request fails.
+   */
+  refresh() {
+    return this.load({ isAutoRefresh: true });
+  }
+
+  /**
+   * Refresh only when the page is active and the interval has elapsed.
+   */
+  _maybeAutoRefresh() {
+    if (!this.config.autoRefresh || !this._isPageActive() || this._isLoading) {
+      return;
+    }
+
+    const lastActivityAt = Math.max(
+      this.lastRefreshedAt || 0,
+      this._lastRefreshAttemptAt || 0
+    );
+
+    if (lastActivityAt === 0 ||
+        Date.now() - lastActivityAt < this.config.refreshIntervalMs) {
+      return;
+    }
+
+    this.refresh();
   }
 
   /**
